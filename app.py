@@ -1,6 +1,11 @@
 import os
 import threading
 import traceback
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 from flask import Flask, render_template, redirect, url_for, jsonify, send_file, request
 from scrape import scrape_all_parallel
 from parse import parse_vulnerabilities_with_ai, generate_ai_insights, find_mitigation
