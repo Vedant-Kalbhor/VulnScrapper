@@ -1,0 +1,68 @@
+# Technical Audit: AI-Powered Vulnerability Scanner
+
+## 1. Executive Summary
+The **AI-Powered Vulnerability Scanner** is a state-of-the-art cybersecurity tool that integrates automated web scraping, active security testing, and advanced Large Language Models (LLMs) to provide a comprehensive vulnerability management solution. By leveraging **Google Gemini 2.5 Flash** and a multi-source verification engine, the platform eliminates common AI hallucinations and provides verified, actionable security intelligence.
+
+---
+
+## 2. System Architecture
+The application is built on a modular Python-Flask architecture, designed for high performance and extensibility.
+
+### Core Components:
+- **Web Scaling Engine ([scrape.py](file:///c:/Users/vedan/Ai-web-scrapper/scrape.py))**: A parallelized scraping engine utilizing `requests`, `BeautifulSoup`, and `Selenium` to ingest data from authoritative sources like NVD and CISA.
+- **AI Intelligence Layer ([parse.py](file:///c:/Users/vedan/Ai-web-scrapper/parse.py))**: Utilizes `langchain-google-genai` to transform unstructured threat data into structured JSON, generate strategic insights, and provide remediation guidance.
+- **Verification Framework ([enhanced_verification.py](file:///c:/Users/vedan/Ai-web-scrapper/enhanced_verification.py))**: A "Zero-Trust" verification system that cross-references AI-suggested vulnerabilities against 5+ authoritative databases (NVD, MITRE, CISA, CVEDetails, Vulners).
+- **Active Scanning Engine (`scanner/`)**: An OWASP-aligned testing suite that performs real-time crawling and payload injection for SQLi and XSS detection.
+- **Reporting & Export ([stix_generator.py](file:///c:/Users/vedan/Ai-web-scrapper/stix_generator.py), [report.py](file:///c:/Users/vedan/Ai-web-scrapper/report.py))**: Generates human-readable text reports and machine-readable STIX 2.1 bundles for integration with SIEM/SOAR platforms.
+
+---
+
+## 3. Key Features & Implementation
+
+### 3.1. Multi-Source Scraper (Passive Intel)
+- **Implementation**: [scrape_all_parallel](file:///c:/Users/vedan/Ai-web-scrapper/scrape.py#225-254) in [scrape.py](file:///c:/Users/vedan/Ai-web-scrapper/scrape.py).
+- **Logic**: Uses a `ThreadPoolExecutor` to concurrently fetch the CISA KEV (Known Exploited Vulnerabilities) JSON feed and the NVD (National Vulnerability Database) RSS feed.
+- **Speed**: Optimized for <10 second execution through direct feed access.
+
+### 3.2. AI-Powered Verification Search
+- **Implementation**: [search_vulnerabilities_with_ai](file:///c:/Users/vedan/Ai-web-scrapper/search_vulnerabilities.py#34-232) in [search_vulnerabilities.py](file:///c:/Users/vedan/Ai-web-scrapper/search_vulnerabilities.py).
+- **Capability**: Performs live web searches for zero-day or recent vulnerabilities related to a specific product or company.
+- **Safety**: Every candidate result is passed through the [CVEVerifier](file:///c:/Users/vedan/Ai-web-scrapper/enhanced_verification.py#14-332) which checks for physical existence on NIST/MITRE sites, preventing "hallucinated" CVE IDs.
+
+### 3.3. Active Vuln Scanner (OWASP Top 10)
+- **Implementation**: [ScannerEngine](file:///c:/Users/vedan/Ai-web-scrapper/scanner/engine.py#7-58) in [scanner/engine.py](file:///c:/Users/vedan/Ai-web-scrapper/scanner/engine.py).
+- **Tests**: 
+    - **SQL Injection**: Form-based testing for database bypass.
+    - **Cross-Site Scripting (XSS)**: URL and Form-based payload injection.
+    - **Security Headers**: Validation of CSP, HSTS, and X-Frame-Options.
+- **Crawl Logic**: Breadth-first crawling to discover attack surfaces independently.
+
+### 3.4. Interactive Dashboard & UI
+- **Implementation**: Flask templates (`dashboard.html`, `live_dashboard.html`).
+- **Visuals**: Uses **Chart.js** for severity distribution (Pie) and affected products (Bar).
+- **UX**: Real-time progress indicators and "Glassmorphism" design aesthetics.
+
+### 3.5. Mitigation Finger & Remediation
+- **Implementation**: [find_mitigation](file:///c:/Users/vedan/Ai-web-scrapper/parse.py#167-224) in [parse.py](file:///c:/Users/vedan/Ai-web-scrapper/parse.py).
+- **Logic**: AI analyzes the specific vulnerability and provides a 4-step remediation plan including patch versions, config changes, and reference links.
+
+---
+
+## 4. Technical Implementation Details
+
+| Module | Primary Technology | Responsibility |
+| :--- | :--- | :--- |
+| **Backend** | Python 3.x / Flask | API management, routing, task scheduling |
+| **Intelligence** | Gemini 2.5 Flash | Parsing, Insight generation, Remediation guidance |
+| **Scraping** | Selenium / BS4 | HTML/JSON extraction from external sources |
+| **Data Integrity** | Multi-Source Verifier | Anti-hallucination logic for CVEs |
+| **Database** | SQLite / Pickle | Caching system (24h TTL) and result storage |
+| **Frontend** | Vanilla JS / Chart.js | Visualization and interactive UI components |
+
+---
+
+## 5. Strategic Benefits
+1. ** हॉल्यूसिनेशन-फ्री एआई (Hallucination-Free AI)**: Unlike standard GPT bots, this tool verifies every claim against the National Vulnerability Database.
+2. **Actionable Intelligence**: Moves beyond simply "finding" a bug by generating step-by-step mitigation commands.
+3. **Machine Interoperability**: STIX 2.1 support allows the data to be used by enterprise security teams immediately.
+4. **Reduced Triage Time**: Automated deduplication and severity sorting allow security analysts to focus on Critical/High risks first.

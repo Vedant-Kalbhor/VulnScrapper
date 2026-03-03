@@ -893,7 +893,6 @@
                                 <th>ID</th>
                                 <th>Title</th>
                                 <th>Severity</th>
-                                <th>CVSS</th>
                                 <th>Affected Products</th>
                             </tr>
                         </thead>
@@ -903,7 +902,7 @@
             if (vulns.length === 0) {
                 tableHTML += `
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px;">
+                        <td colspan="4" style="text-align: center; padding: 40px;">
                             <i class="fas fa-search" style="font-size: 2rem; color: var(--text-light); margin-bottom: 10px; display: block;"></i>
                             No vulnerabilities found matching your search criteria.
                         </td>
@@ -921,7 +920,6 @@
                             <td><strong>${v.id || 'N/A'}</strong></td>
                             <td>${(v.title || 'No title').substring(0, 60)}${v.title && v.title.length > 60 ? '...' : ''}</td>
                             <td><span class="severity-badge severity-${severity.toLowerCase()}">${severity}</span></td>
-                            <td>${v.cvss_score ? `<span class="cvss-score">${v.cvss_score}</span>` : 'N/A'}</td>
                             <td>${products}${moreProducts}</td>
                         </tr>
                     `;

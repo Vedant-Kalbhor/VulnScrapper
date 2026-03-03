@@ -19,3 +19,4 @@ exploit_cache.pkl
 .vscode/
 .idea/
 .env 
+.env
