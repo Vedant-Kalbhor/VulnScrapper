@@ -12,3 +12,4 @@ duckduckgo-search
 requests
 ddgs
 gunicorn
+langchain-core

@@ -6,24 +6,26 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DEBIAN_FRONTEND noninteractive
 
-# Install system dependencies for Chrome and Selenium
+# Install system dependencies for Chrome
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     unzip \
     curl \
-    libgconf-2-4 \
     libnss3 \
     libxss1 \
     libasound2 \
     libatk-bridge2.0-0 \
     libgtk-3-0 \
-    libgbm-dev \
+    libgbm1 \
+    libxkbcommon0 \
+    libpango-1.0-0 \
+    libcairo2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+# Install Google Chrome (Modern Method)
+RUN curl -fSsL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor | tee /usr/share/keyrings/google-chrome.gpg > /dev/null \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
@@ -37,11 +39,14 @@ COPY requirements.txt .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the current directory contents into the container at /app
-COPY . .
-
-# Create a non-root user and switch to it for security
+# Create a non-root user
 RUN useradd -m myuser
+
+# Copy project files and ensure myuser owns them (for SQLite/.pkl caching)
+COPY . .
+RUN chown -R myuser:myuser /app
+
+# Switch to the non-root user
 USER myuser
 
 # Make port 5000 available to the world outside this container
